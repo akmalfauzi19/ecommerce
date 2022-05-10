@@ -1,8 +1,89 @@
-import React, { createContext, useContext, useStatet, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
 const Context = createContext();
 
-export const StateContext = ((children) => {
+export const StateContext = ({ children }) => {
+    const [showCart, setShowCart] = useState(false);
+    const [cartItems, setCartItems] = useState([]);
 
-})
+    const [totalPrice, setTotalPrice] = useState();
+    const [totalQuantities, setTotalQuantities] = useState(0);
+    const [qty, setQty] = useState(1);
+
+    const onAdd = (product, quantity) => {
+        const checkProductinCart = cartItems.find((item) => item._id === product._id);
+
+        setTotalPrice((prevTotalPrice) => prevTotalPrice + product.price * quantity);
+        setTotalQuantities((prevTotalQuantities) => prevTotalQuantities + quantity);
+
+        if (checkProductinCart) {
+
+
+            const updatedCartItems = cartItems.map((cartProduct) => {
+                if (cartProduct._id === product._id)
+                    return {
+                        ...cartProduct,
+                        quantity: cartProduct.quantity + quantity
+                    }
+            });
+
+            setCartItems(updatedCartItems);
+        } else {
+            product.quantity = quantity;
+            setCartItems([...cartItems, { ...product }]);
+
+        }
+        toast.success(`${qty} ${product.name} added to the cart.`);
+    }
+
+    const incQty = () => {
+        setQty((prevQty) => prevQty + 1);
+    }
+
+    const decQty = () => {
+        setQty((prevQty) => {
+            if (prevQty - 1 < 1)
+                return 1;
+
+            return prevQty - 1;
+        });
+    }
+
+    const IdrFormat = (string) => {
+
+        var number_string = string.toString(),
+            over = number_string.length % 3,
+            idr = number_string.substr(0, over),
+            thousand = number_string.substr(over).match(/\d{3}/g);
+
+        if (thousand) {
+            var separator = over ? '.' : '';
+            idr += separator + thousand.join('.');
+        }
+
+        return 'Rp. ' + idr;
+
+    }
+
+    return (
+        <Context.Provider value={{
+            showCart,
+            cartItems,
+            setShowCart,
+            totalPrice,
+            totalQuantities,
+            qty,
+            incQty,
+            decQty,
+            onAdd,
+            IdrFormat
+        }}>
+            {children}
+        </Context.Provider>
+    );
+};
+
+
+export const useStateContext = () => useContext(Context);
+
