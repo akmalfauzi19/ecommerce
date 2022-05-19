@@ -9,23 +9,12 @@ const ProductDetails = ({ product, products }) => {
     const { image, name, details, price } = product;
 
     const [index, setIndex] = useState(0);
-    const { qty, incQty, decQty, onAdd } = useStateContext();
+    const { qty, incQty, decQty, onAdd, setShowCart, IdrFormat } = useStateContext();
 
-
-    function IdrFormat(string) {
-        var number_string = string.toString(),
-            over = number_string.length % 3,
-            idr = number_string.substr(0, over),
-            thousand = number_string.substr(over).match(/\d{3}/g);
-
-        if (thousand) {
-            var separator = over ? '.' : '';
-            idr += separator + thousand.join('.');
-        }
-
-        return 'Rp. ' + idr;
+    const handleBuyNow = () => {
+        onAdd(product, qty);
+        setShowCart(true);
     }
-
     return (
         <div>
             <div className='product-detail-container'>
@@ -35,7 +24,8 @@ const ProductDetails = ({ product, products }) => {
                     </div>
                     <div className='small-images-container'>
                         {image?.map((item, i) => (
-                            <img src={urlFor(item)}
+                            <img key={i}
+                                src={urlFor(item)}
                                 className={i === index ? 'small-image selected-image' : 'small-image'}
                                 onMouseEnter={() => setIndex(i)}
                             />
@@ -69,20 +59,18 @@ const ProductDetails = ({ product, products }) => {
                                 <AiOutlineMinus />
                             </span>
 
-                            <span className='num' onClick="">
+                            <span className='num'>
                                 {qty}
                             </span>
                             <span className='plus' onClick={incQty}>
                                 <AiOutlinePlus />
                             </span>
-
-
                         </p>
                     </div>
 
                     <div className='buttons'>
                         <button type='button' className='add-to-cart' onClick={() => onAdd(product, qty)}>Add to Cart</button>
-                        <button type='button' className='buy-now' onClick=''>Buy Now</button>
+                        <button type='button' className='buy-now' onClick={handleBuyNow}>Buy Now</button>
                     </div>
 
                 </div>
@@ -94,7 +82,7 @@ const ProductDetails = ({ product, products }) => {
                 <div className='marquee'>
                     <div className='maylike-products-container track'>
                         {products.map((item) => (
-                            <Product key={item.id} product={item} />
+                            <Product key={item._id} product={item} />
                         ))}
                     </div>
                 </div>
@@ -109,8 +97,7 @@ export const getStaticPaths = async () => {
     slug {
       current
     }
-  }
-  `;
+  }`;
 
     const products = await client.fetch(query);
 
@@ -132,9 +119,6 @@ export const getStaticProps = async ({ params: { slug } }) => {
 
     const product = await client.fetch(query);
     const products = await client.fetch(productsQuery);
-
-    console.log(product);
-
     return {
         props: { products, product }
     }

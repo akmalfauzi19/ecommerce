@@ -3,25 +3,15 @@ import Link from 'next/link';
 
 import { urlFor } from '../lib/client';
 
+import { useStateContext } from '../context/StateContext';
+
+
 const Product = ({ product: { image, name, slug, price } }) => {
     function ucFirst(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    function IdrFormat(string) {
-        var number_string = string.toString(),
-            over = number_string.length % 3,
-            idr = number_string.substr(0, over),
-            thousand = number_string.substr(over).match(/\d{3}/g);
-
-        if (thousand) {
-            var separator = over ? '.' : '';
-            idr += separator + thousand.join('.');
-        }
-
-        return 'Rp. ' + idr;
-    }
-
+    const { IdrFormat } = useStateContext();
     return (
         <div>
             <Link href={`/product/${slug.current}`}>
